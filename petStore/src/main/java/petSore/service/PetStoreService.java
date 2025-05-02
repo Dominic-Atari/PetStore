@@ -1,12 +1,14 @@
 package petSore.service;
 
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.Data;
 import petSore.Dao.PetStoreDao;
@@ -14,13 +16,13 @@ import petSore.cotroller.model.PetStoreData;
 import petSore.entity.PetStore;
 
 @Service
-@Data //it still running well without Data annotation
+@Data //iIt still running well without Data annotation
 public class PetStoreService {
 	
 	@Autowired
 	private PetStoreDao petStoreDao;
 
-	//it still compiles with out error even when i did not include @Transactuonal(readOnly = false)
+	//It still compiles with out error even when I did not include @Transactuonal(readOnly = false)
 	public PetStoreData savePetStore(PetStoreData petStoreData) {
 		Long petStoreId = petStoreData.getPetStoreId();
 		PetStore petStore = findOrCreatePetStore(petStoreId, petStoreData.getPetStoreEmail());
@@ -66,4 +68,26 @@ public class PetStoreService {
 		
 	}
 
+	public List<PetStoreData> retrieveAllPetStores() {
+		//@formatter:off
+		return petStoreDao.findAll()
+				.stream()
+				.map(PetStoreData::new)
+				.toList();
+		//@formatter:on
+	}
+	//@Transactional(readOnly = true)
+	public PetStoreData retrievePetStoreById(Long petStoreId) {
+		PetStore petStore = findPetStoreById(petStoreId);
+		return new PetStoreData(petStore);
+	}
+
+	public void deletePetStoreById(Long petStoreId) {
+		PetStore petStore = findPetStoreById(petStoreId);
+		
+		petStoreDao.delete(petStore);
+		
+	}
+
+	
 }
